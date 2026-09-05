@@ -82,7 +82,7 @@
   function contactHTML(lo) {
     var f = esc(lo.first);
     var formUrl = CFG.FORM_EMBED_URL ? CFG.FORM_EMBED_URL + (CFG.FORM_EMBED_URL.indexOf('?') > -1 ? '&' : '?') + 'lo=' + encodeURIComponent(lo.slug) + '&lo_email=' + encodeURIComponent(lo.email) : '';
-    var form = formUrl ? '<iframe src="' + formUrl + '" style="width:100%;min-height:920px;border:0;border-radius:12px" title="Contact ' + f + '"></iframe>' :
+    var form = formUrl ? '<iframe src="' + formUrl + '" id="acre-lo-form" scrolling="no" style="width:100%;min-height:920px;border:0;border-radius:12px;display:block" title="Contact ' + f + '"></iframe>' :
       '<form class="demo" id="demo-form"><div class="two"><input placeholder="First name" required autocomplete="given-name"><input placeholder="Last name" required autocomplete="family-name"></div><input type="tel" placeholder="Phone" required autocomplete="tel"><input type="email" placeholder="Email" required autocomplete="email"><select><option value="">I\'m looking to…</option><option>Buy a home</option><option>Refinance</option><option>Tap my equity</option><option>Renovate or build</option><option>Explore a reverse mortgage</option></select><button class="btn btn-green" type="submit">Send ' + f + ' a message</button><p class="fine">By submitting you agree to be contacted by Acre Mortgage by phone, text or email about your inquiry. Consent is not a condition of purchase.</p></form><div class="done"><h3>Thanks, ' + f + ' has it.</h3><p>Expect a call or email the same business day.</p></div>';
     return '<div class="contact" id="contact"><div class="head-bar">' + avatar(lo, 'hb-av') + '<div><b>Reach ' + f + '</b><span>Replies the same business day</span></div></div><div class="body">' +
       '<a class="row" href="tel:+1' + lo.phoneDigits + '">' + I.phone + '<span><small>Call or text</small><b>' + esc(lo.phone) + '</b></span></a>' +
@@ -136,6 +136,19 @@
     fill('programs', programsHTML(lo)); fill('steps', stepsHTML(lo)); fill('team', teamHTML(lo)); fill('contact', contactHTML(lo)); fill('after', afterHTML(lo));
     root.insertAdjacentHTML('beforeend', footerHTML());
     wire(root);
+    autoSizeForm(root);
+  }
+  // Auto-size the Cerberus form: it runs iframe-resizer inside; send its init handshake and apply the heights it reports, so the form never scrolls inside the card.
+  function autoSizeForm(root) {
+    var fr = root.querySelector('#acre-lo-form'); if (!fr) return;
+    var fid = fr.id;
+    var initSizer = function () { try { fr.contentWindow.postMessage('[iFrameSizer]' + fid + ':8:false:false:32:true:true:null:offset:null:null:0:false:parent:true', '*'); } catch (e) {} };
+    fr.addEventListener('load', initSizer); setTimeout(initSizer, 1500); setTimeout(initSizer, 4000);
+    window.addEventListener('message', function (e) {
+      if (typeof e.data !== 'string' || e.data.indexOf('[iFrameSizer]' + fid + ':') !== 0) return;
+      var h = parseInt(e.data.slice(13).split(':')[1], 10);
+      if (h > 0) { fr.style.minHeight = '0'; fr.style.height = (h + 6) + 'px'; }
+    });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 })();
