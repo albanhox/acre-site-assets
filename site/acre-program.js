@@ -1,3 +1,4 @@
+/* acre-program.js - build 2026-09-06: sticky nav + GHL wrapper padding reset */
 /* Acre Mortgage loan-program pages: shared script.
    Lives at github.com/albanhox/acre-site-assets -> site/acre-program.js, served by jsDelivr.
    Every program page in Cerberus holds only that program's content (hero, body, survey card) inside
