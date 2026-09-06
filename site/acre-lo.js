@@ -128,6 +128,18 @@
 
   function init() {
     var root = document.getElementById('acre-lo'); if (!root || root.dataset.ready) return; root.dataset.ready = '1';
+    // GHL wraps the pasted block in section > row > column, each carrying default
+    // top/bottom padding (20/10/10). The homepage has these zeroed; match it so the
+    // sticky nav sits flush at the top and the footer sits flush at the bottom.
+    (function () {
+      var w = root.parentElement;
+      while (w && w !== document.body) {
+        if (/c-section|c-row|c-column|c-custom-code|custom-code-container/.test(w.className || '')) {
+          w.style.paddingTop = '0px'; w.style.paddingBottom = '0px';
+        }
+        w = w.parentElement;
+      }
+    })();
     var slug = root.getAttribute('data-lo'); var lo = null;
     for (var i = 0; i < ROSTER.length; i++) if (ROSTER[i].slug === slug) lo = ROSTER[i];
     if (!lo) { console.warn('acre-lo: no roster entry for', slug); return; }

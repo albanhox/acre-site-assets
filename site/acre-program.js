@@ -96,6 +96,18 @@
   }
   function init() {
     var root = document.getElementById('acre-program'); if (!root || root.dataset.ready) return; root.dataset.ready = '1';
+    // GHL wraps the pasted block in section > row > column, each carrying default
+    // top/bottom padding (20/10/10). The homepage has these zeroed; match it so the
+    // sticky nav sits flush at the top and the footer sits flush at the bottom.
+    (function () {
+      var w = root.parentElement;
+      while (w && w !== document.body) {
+        if (/c-section|c-row|c-column|c-custom-code|custom-code-container/.test(w.className || '')) {
+          w.style.paddingTop = '0px'; w.style.paddingBottom = '0px';
+        }
+        w = w.parentElement;
+      }
+    })();
     var fill = function (name, html) { var el = root.querySelector('[data-slot="' + name + '"]'); if (el) el.innerHTML = html; };
     // Replace the nav slot rather than filling it: a sticky element can only travel
     // inside its own parent, and the slot div is only as tall as the header, so
