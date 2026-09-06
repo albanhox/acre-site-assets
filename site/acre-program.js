@@ -97,7 +97,12 @@
   function init() {
     var root = document.getElementById('acre-program'); if (!root || root.dataset.ready) return; root.dataset.ready = '1';
     var fill = function (name, html) { var el = root.querySelector('[data-slot="' + name + '"]'); if (el) el.innerHTML = html; };
-    fill('nav', navHTML());
+    // Replace the nav slot rather than filling it: a sticky element can only travel
+    // inside its own parent, and the slot div is only as tall as the header, so
+    // filling it leaves the nav unable to stick. Swapping the wrapper out makes the
+    // header a direct child of #acre-program, matching acre-lo.js and the homepage.
+    var navSlot = root.querySelector('[data-slot="nav"]');
+    if (navSlot) navSlot.outerHTML = navHTML();
     fill('after', estHTML(root) + relatedHTML(root) + bandHTML() + footerHTML());
     wire(root);
     autoSize(root);
