@@ -47,7 +47,15 @@
   #acre-lo .link:hover svg { transform: translateX(3px); }
 
   /* Nav (same rules as the homepage, including the overflow fix and scroll compaction) */
-  #acre-lo .nav { position: sticky; top: 0; z-index: 50; background: rgba(255,255,255,.92); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid var(--hair); transition: box-shadow .3s ease, background-color .3s ease; }
+  #acre-lo .nav { position: sticky;
+  /* GHL wraps the pasted block in section > row > column, each with default 20/10/10
+     top and bottom padding; the homepage has these zeroed. Match it so the nav sits
+     flush at the top and the footer flush at the bottom. acre-lo.js does the same
+     at runtime - this is the CSS route for pages served an older script, and setting
+     the same 0 twice is harmless. */
+  .c-section:has(#acre-lo), .c-row:has(#acre-lo), .c-column:has(#acre-lo) {
+    padding-top: 0 !important; padding-bottom: 0 !important;
+  } top: 0; z-index: 50; background: rgba(255,255,255,.92); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid var(--hair); transition: box-shadow .3s ease, background-color .3s ease; }
   #acre-lo .nav.scrolled { box-shadow: 0 8px 28px rgba(18,23,18,.07); background: rgba(255,255,255,.96); }
   #acre-lo .nav-inner { display: flex; align-items: center; gap: 24px; height: 86px; transition: height .3s ease; }
   #acre-lo .nav.scrolled .nav-inner { height: 70px; }
