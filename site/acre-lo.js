@@ -81,7 +81,11 @@
   }
   function contactHTML(lo) {
     var f = esc(lo.first);
-    var formUrl = CFG.FORM_EMBED_URL ? CFG.FORM_EMBED_URL + (CFG.FORM_EMBED_URL.indexOf('?') > -1 ? '&' : '?') + 'lo=' + encodeURIComponent(lo.slug) + '&lo_email=' + encodeURIComponent(lo.email) : '';
+    // Lead form: identify the officer AND the page, so an LO-page lead is distinguishable from a
+    // program/branch lead in Cerberus. Query keys (not field keys): lo, lo_email, website_program,
+    // website_source_page. website_program is the constant "Loan officer page" so the notification
+    // workflow can branch on it; website_source_page is this officer's own landing page.
+    var formUrl = CFG.FORM_EMBED_URL ? CFG.FORM_EMBED_URL + (CFG.FORM_EMBED_URL.indexOf('?') > -1 ? '&' : '?') + 'lo=' + encodeURIComponent(lo.slug) + '&lo_email=' + encodeURIComponent(lo.email) + '&website_program=' + encodeURIComponent('Loan officer page') + '&website_source_page=' + encodeURIComponent(CFG.SITE.replace(/\/$/, '') + '/' + lo.slug) : '';
     var form = formUrl ? '<iframe src="' + formUrl + '" id="acre-lo-form" scrolling="no" style="width:100%;min-height:920px;border:0;border-radius:12px;display:block" title="Contact ' + f + '"></iframe>' :
       '<form class="demo" id="demo-form"><div class="two"><input placeholder="First name" required autocomplete="given-name"><input placeholder="Last name" required autocomplete="family-name"></div><input type="tel" placeholder="Phone" required autocomplete="tel"><input type="email" placeholder="Email" required autocomplete="email"><select><option value="">I\'m looking to…</option><option>Buy a home</option><option>Refinance</option><option>Tap my equity</option><option>Renovate or build</option><option>Explore a reverse mortgage</option></select><button class="btn btn-green" type="submit">Send ' + f + ' a message</button><p class="fine">By submitting you agree to be contacted by Acre Mortgage by phone, text or email about your inquiry. Consent is not a condition of purchase.</p></form><div class="done"><h3>Thanks, ' + f + ' has it.</h3><p>Expect a call or email the same business day.</p></div>';
     return '<div class="contact" id="contact"><div class="head-bar">' + avatar(lo, 'hb-av') + '<div><b>Reach ' + f + '</b><span>Replies the same business day</span></div></div><div class="body">' +
