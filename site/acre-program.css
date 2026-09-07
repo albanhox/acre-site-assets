@@ -82,7 +82,8 @@
   #acre-program .nav.open .nav-toggle { background: var(--sage); }
   #acre-program .nav.open .nav-toggle svg { transform: rotate(90deg); }
   @media (min-width: 1061px) and (max-width: 1259px) { #acre-program .nav-phone { display: none; } #acre-program .nav-links { gap: 16px; } }
-  @media (min-width: 1260px) { #acre-program .nav-right .nav-staff { display: inline-flex; } }
+  /* Staff Portal sits right of the CTA on desktop; gaps tighten so the bar still fits the 1,200px grid (measured 2026-09-07). */
+  @media (min-width: 1260px) { #acre-program .nav-right .nav-staff { display: inline-flex; } #acre-program .nav-inner { gap: 16px; } #acre-program .nav-links { gap: 13px; } #acre-program .nav-right { gap: 13px; } }
   @media (max-width: 1060px) {
     #acre-program .nav-toggle { display: block; }
     #acre-program .nav-inner { height: auto; min-height: 66px; flex-wrap: wrap; gap: 0 16px; transition: none; }
