@@ -7,6 +7,7 @@
 (function () {
   'use strict';
   var CFG = {
+    PORTAL_API: 'https://portal.acremortgage.com',   // LO Portal: approved profile edits overlay the pasted block from here (60 s cache)
     // Cerberus form "Website - Contact a loan officer" (id 8zQblX58jDyoLXY56rmr). The officer's slug and email are
     // appended as ?lo=<slug>&lo_email=<email>; the form's hidden "Loan officer" field has query key "lo".
     FORM_EMBED_URL: 'https://api.leadconnectorhq.com/widget/form/8zQblX58jDyoLXY56rmr',
@@ -153,6 +154,28 @@
     root.insertAdjacentHTML('beforeend', footerHTML());
     wire(root);
     autoSizeForm(root);
+    liveProfile(root, lo);
+  }
+  // LO Portal overlay. The pasted block ships the last-published bio for crawlers; this fetches the
+  // current approved record and patches the parts an officer can edit (intro line, bio, portrait,
+  // contact thumb). Any failure leaves the page exactly as pasted.
+  function liveProfile(root, lo) {
+    if (!CFG.PORTAL_API || !window.fetch) return;
+    var esc = function (t) { return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
+    fetch(CFG.PORTAL_API + '/api/lo/' + encodeURIComponent(lo.slug), { cache: 'default' })
+      .then(function (r) { return r.ok ? r.json() : Promise.reject(); })
+      .then(function (p) {
+        if (!p || p.slug !== lo.slug) return;
+        var el;
+        if (p.lede && (el = root.querySelector('.p-hero .lede'))) el.textContent = p.lede;
+        if (p.bio && p.bio.length && (el = root.querySelector('.bio'))) {
+          el.innerHTML = p.bio.map(function (t) { return '<p>' + esc(t) + '</p>'; }).join('');
+        }
+        if (p.portrait && (el = root.querySelector('.p-portrait img')) && el.getAttribute('src') !== p.portrait) el.setAttribute('src', p.portrait);
+        if (p.thumb) root.querySelectorAll('img[data-lo-thumb="' + lo.slug + '"]').forEach(function (im) { im.setAttribute('src', p.thumb); });
+        root.setAttribute('data-live-profile', p.updatedAt || '1');
+      })
+      .catch(function () { /* stay with the pasted content */ });
   }
   // Auto-size the Cerberus form: it runs iframe-resizer inside; send its init handshake and apply the heights it reports, so the form never scrolls inside the card.
   function autoSizeForm(root) {
