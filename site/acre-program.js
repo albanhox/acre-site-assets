@@ -1,4 +1,4 @@
-/* acre-program.js - build 2026-09-06: sticky nav + GHL wrapper padding reset */
+/* acre-program.js - build 2026-09-07: Staff Portal link in menu + footer */
 /* Acre Mortgage loan-program pages: shared script.
    Lives at github.com/albanhox/acre-site-assets -> site/acre-program.js, served by jsDelivr.
    Every program page in Cerberus holds only that program's content (hero, body, survey card) inside
@@ -36,7 +36,7 @@
       '<a class="logo" href="' + S + '" aria-label="Acre Mortgage home"><img src="' + CFG.LOGO + '" alt="Acre Mortgage"></a>' +
       '<button class="nav-toggle" aria-label="Menu" aria-expanded="false" id="nav-toggle">' + I.menu + '</button>' +
       '<nav class="nav-links" aria-label="Main"><a href="' + S + '/purchase">Buy</a><a href="' + S + '/refinance">Refinance</a><a href="' + S + '/home-equity">Home equity</a><a href="' + S + '/construction">Renovate</a><a href="' + S + '/reverse-refinance">Reverse</a><a href="' + S + '/#rates">Rates</a><a href="' + S + '/#experts">Loan officers</a><a href="' + S + '/#learn">Resources</a></nav>' +
-      '<div class="nav-right"><a class="quiet" href="' + CFG.PAY_URL + '" target="_blank" rel="noopener">Make a payment</a><a class="nav-phone" href="tel:' + CFG.HQ_TEL + '">' + I.phone + CFG.HQ_PHONE + '</a><a class="btn btn-black btn-sm" href="#apply">Get pre-approved</a></div>' +
+      '<div class="nav-right"><a class="quiet" href="' + CFG.PAY_URL + '" target="_blank" rel="noopener">Make a payment</a><a class="quiet" href="' + S + '/team-login">Staff Portal</a><a class="nav-phone" href="tel:' + CFG.HQ_TEL + '">' + I.phone + CFG.HQ_PHONE + '</a><a class="btn btn-black btn-sm" href="#apply">Get pre-approved</a></div>' +
       '</div></header>';
   }
   function footerHTML() {
@@ -49,7 +49,7 @@
       col('Buy', [['Conventional', S + '/conventional-purchase'], ['FHA', S + '/fha-purchase'], ['VA', S + '/va-purchase'], ['USDA', S + '/usda-purchase'], ['Jumbo', S + '/jumbo-purchase'], ['Down payment assistance', S + '/dpa']]) +
       col('Refinance', [['Rate and term', S + '/conventional-refinance'], ['Home equity', S + '/home-equity'], ['FHA streamline', S + '/fha-refinance'], ['VA IRRRL', S + '/va-refinance'], ['DSCR investor', S + '/dscr-refinance']]) +
       col('Renovate &amp; reverse', [['Construction', S + '/construction'], ['FHA 203k', S + '/203k-purchase'], ['HomeStyle', S + '/homestyle-purchase'], ['Reverse mortgage', S + '/reverse-refinance'], ['Reverse purchase', S + '/reverse-purchase']]) +
-      col('Company', [['About Acre', S + '/about-us'], ['Loan officers', S + '/#experts'], ['Branch map', S + '/#branches'], ['Book an appointment', S + '/calendar'], ['Make a payment', CFG.PAY_URL, 1], ['Calculators', S + '/mortgagecalc'], ['NMLS Consumer Access', 'https://www.nmlsconsumeraccess.org/EntityDetails.aspx/COMPANY/13988', 1]]) +
+      col('Company', [['About Acre', S + '/about-us'], ['Loan officers', S + '/#experts'], ['Branch map', S + '/#branches'], ['Book an appointment', S + '/calendar'], ['Make a payment', CFG.PAY_URL, 1], ['Calculators', S + '/mortgagecalc'], ['NMLS Consumer Access', 'https://www.nmlsconsumeraccess.org/EntityDetails.aspx/COMPANY/13988', 1], ['Staff Portal', S + '/team-login']]) +
       '</div><div class="legal"><div class="ehl">' + I.ehl + '<span>Acre Mortgage is an Equal Housing Lender. We fully comply with the Equal Credit Opportunity Act (ECOA) and all other Federal regulations. All applicants applying for credit from Acre Mortgage will never be discouraged on the basis of race, color, religion, national origin, sex, military status, marital status, age, or because you get public assistance. All information we request is voluntary and will be kept confidential.</span></div>' +
       '<p>Acre Mortgage, NMLS 13988, is licensed to lend in Alabama, Colorado, Connecticut, Delaware, the District of Columbia, Florida, Georgia, Indiana, Maryland, New Jersey, North Carolina, Pennsylvania, South Carolina, Tennessee, Texas and Virginia. Verify our licenses at <a href="https://www.nmlsconsumeraccess.org/EntityDetails.aspx/COMPANY/13988" target="_blank" rel="noopener">NMLS Consumer Access</a>. Rates shown are national averages for information only and are not an offer to lend. This is not a commitment to lend. All loans subject to credit approval and program guidelines. Rates, terms and programs subject to change without notice. <a href="' + S + '/licensing">Licensing</a> · <a href="' + S + '/terms-and-conditions">Terms &amp; conditions</a> · <a href="' + S + '/privacy-policy">Privacy policy</a> · © ' + YEAR + ' Acre Mortgage</p></div></div></footer>';
   }
