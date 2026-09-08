@@ -60,6 +60,8 @@
      at runtime - this is the CSS route for pages served an older script, and setting
      the same 0 twice is harmless. */
   .c-section:has(#acre-program), .c-row:has(#acre-program), .c-column:has(#acre-program) {
+  /* A page whose Section has "Allow Rows to take entire width" off caps its inner container at 1170px (found on /team-login 2026-09-08, the builder switch would not respond). Release it wherever our block is present. */
+  .c-section:has(#acre-program) > .inner { max-width: none; }
     padding-top: 0 !important; padding-bottom: 0 !important;
   }
   #acre-program .nav { position: sticky; top: 0; z-index: 50; background: rgba(255,255,255,.92); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid var(--hair); transition: box-shadow .3s ease, background-color .3s ease; }
