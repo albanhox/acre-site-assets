@@ -82,8 +82,12 @@
   #acre-program .nav.open .nav-toggle { background: var(--sage); }
   #acre-program .nav.open .nav-toggle svg { transform: rotate(90deg); }
   @media (min-width: 1061px) and (max-width: 1259px) { #acre-program .nav-phone { display: none; } #acre-program .nav-links { gap: 16px; } }
-  /* Staff Portal sits right of the CTA on desktop; gaps tighten so the bar still fits the 1,200px grid (measured 2026-09-07). */
-  @media (min-width: 1260px) { #acre-program .nav-right .nav-staff { display: inline-flex; } #acre-program .nav-inner { gap: 16px; } #acre-program .nav-links { gap: 13px; } #acre-program .nav-right { gap: 13px; } }
+  /* "Make a payment" + "Staff Portal" are small outlined pills right of the CTA. With the phone kept, the bar needs
+     1,337px, so the header runs wider than the 1,200px body (1,360px) at desktop widths; below ~1,385px the two pills
+     hide (they stay in the menu and footer) so the phone and CTA never get squeezed. Measured live 2026-09-08. */
+  #acre-program .btn-xs { padding: 8px 13px; font-size: .82rem; border-width: 1px; }
+  @media (min-width: 1260px) { #acre-program .nav-inner { width: min(1360px, calc(100% - 48px)); gap: 16px; } #acre-program .nav-links { gap: 13px; } #acre-program .nav-right { gap: 13px; } }
+  @media (min-width: 1061px) and (max-width: 1384px) { #acre-program .nav-right .nav-pay, #acre-program .nav-right .nav-staff { display: none; } }
   @media (max-width: 1060px) {
     #acre-program .nav-toggle { display: block; }
     #acre-program .nav-inner { height: auto; min-height: 66px; flex-wrap: wrap; gap: 0 16px; transition: none; }

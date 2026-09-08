@@ -36,7 +36,7 @@
       '<a class="logo" href="' + S + '" aria-label="Acre Mortgage home"><img src="' + CFG.LOGO + '" alt="Acre Mortgage"></a>' +
       '<button class="nav-toggle" aria-label="Menu" aria-expanded="false" id="nav-toggle">' + I.menu + '</button>' +
       '<nav class="nav-links" aria-label="Main"><a href="' + S + '/purchase">Buy</a><a href="' + S + '/refinance">Refinance</a><a href="' + S + '/home-equity">Home equity</a><a href="' + S + '/construction">Renovate</a><a href="' + S + '/reverse-refinance">Reverse</a><a href="' + S + '/#rates">Rates</a><a href="' + S + '/#experts">Loan officers</a><a href="' + S + '/#learn">Resources</a></nav>' +
-      '<div class="nav-right"><a class="quiet" href="' + CFG.PAY_URL + '" target="_blank" rel="noopener">Make a payment</a><a class="nav-phone" href="tel:' + CFG.HQ_TEL + '">' + I.phone + CFG.HQ_PHONE + '</a><a class="btn btn-black btn-sm" href="#apply">Get pre-approved</a><a class="quiet nav-staff" href="' + S + '/team-login">Staff Portal</a></div>' +
+      '<div class="nav-right"><a class="nav-phone" href="tel:' + CFG.HQ_TEL + '">' + I.phone + CFG.HQ_PHONE + '</a><a class="btn btn-black btn-sm" href="#apply">Get pre-approved</a><a class="btn btn-line btn-xs nav-pay" href="' + CFG.PAY_URL + '" target="_blank" rel="noopener">Make a payment</a><a class="btn btn-line btn-xs nav-staff" href="' + S + '/team-login">Staff Portal</a></div>' +
       '</div></header>';
   }
   function footerHTML() {
