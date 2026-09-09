@@ -156,18 +156,21 @@
     wire(root);
     autoSizeForm(root);
     // Hero intro dedupe: pasted blocks built before 2026-09-09 repeat the first bio paragraph as the lede.
-    (function () {
-      var ledeEl = root.querySelector('.p-hero .lede'), firstP = root.querySelector('.bio p');
-      if (!ledeEl || !firstP || ledeEl.textContent.trim() !== firstP.textContent.trim()) return;
-      var where = lo.cityOnly ? 'serving ' + lo.city + ', ' + lo.state : (lo.hq ? 'at the Marlton, NJ headquarters' : 'in ' + lo.city + ', ' + lo.state);
-      if (lo.bioPlaceholder) { ledeEl.textContent = lo.title + ' at Acre Mortgage, ' + where + '. Same-day replies, in-house underwriting, licensed in 15 states and DC.'; return; }
-      var t = firstP.textContent.trim(), mt = t.match(/^.+?[.!?](?=\s|$)/); ledeEl.textContent = mt ? mt[0] : t.slice(0, 180);
-    })();
+    // Runs here and again after the LO Portal overlay, which re-applies the stored (identical) intro.
+    dedupeLede(root, lo);
     liveProfile(root, lo);
   }
   // LO Portal overlay. The pasted block ships the last-published bio for crawlers; this fetches the
   // current approved record and patches the parts an officer can edit (intro line, bio, portrait,
   // contact thumb). Any failure leaves the page exactly as pasted.
+  // Hero intro dedupe (module scope: init() and liveProfile() both call it).
+  function dedupeLede(root, lo) {
+    var ledeEl = root.querySelector('.p-hero .lede'), firstP = root.querySelector('.bio p');
+    if (!ledeEl || !firstP || ledeEl.textContent.trim() !== firstP.textContent.trim()) return;
+    var where = lo.cityOnly ? 'serving ' + lo.city + ', ' + lo.state : (lo.hq ? 'at the Marlton, NJ headquarters' : 'in ' + lo.city + ', ' + lo.state);
+    if (lo.bioPlaceholder) { ledeEl.textContent = lo.title + ' at Acre Mortgage, ' + where + '. Same-day replies, in-house underwriting, licensed in 15 states and DC.'; return; }
+    var t = firstP.textContent.trim(), mt = t.match(/^.+?[.!?](?=\s|$)/); ledeEl.textContent = mt ? mt[0] : t.slice(0, 180);
+  }
   function liveProfile(root, lo) {
     if (!CFG.PORTAL_API || !window.fetch) return;
     var esc = function (t) { return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
@@ -183,6 +186,7 @@
         if (p.portrait && (el = root.querySelector('.p-portrait img')) && el.getAttribute('src') !== p.portrait) el.setAttribute('src', p.portrait);
         if (p.thumb) root.querySelectorAll('img[data-lo-thumb="' + lo.slug + '"]').forEach(function (im) { im.setAttribute('src', p.thumb); });
         root.setAttribute('data-live-profile', p.updatedAt || '1');
+        dedupeLede(root, lo);
       })
       .catch(function () { /* stay with the pasted content */ });
   }
