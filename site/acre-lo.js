@@ -155,6 +155,14 @@
     root.insertAdjacentHTML('beforeend', footerHTML());
     wire(root);
     autoSizeForm(root);
+    // Hero intro dedupe: pasted blocks built before 2026-09-09 repeat the first bio paragraph as the lede.
+    (function () {
+      var ledeEl = root.querySelector('.p-hero .lede'), firstP = root.querySelector('.bio p');
+      if (!ledeEl || !firstP || ledeEl.textContent.trim() !== firstP.textContent.trim()) return;
+      var where = lo.cityOnly ? 'serving ' + lo.city + ', ' + lo.state : (lo.hq ? 'at the Marlton, NJ headquarters' : 'in ' + lo.city + ', ' + lo.state);
+      if (lo.bioPlaceholder) { ledeEl.textContent = lo.title + ' at Acre Mortgage, ' + where + '. Same-day replies, in-house underwriting, licensed in 15 states and DC.'; return; }
+      var t = firstP.textContent.trim(), mt = t.match(/^.+?[.!?](?=\s|$)/); ledeEl.textContent = mt ? mt[0] : t.slice(0, 180);
+    })();
     liveProfile(root, lo);
   }
   // LO Portal overlay. The pasted block ships the last-published bio for crawlers; this fetches the
