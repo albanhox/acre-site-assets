@@ -9,7 +9,7 @@
   var CFG = {
     RATES_URL: 'https://raw.githubusercontent.com/albanhox/acre-rates/main/rates.json',
     HQ_PHONE: '(856) 606-1070', HQ_TEL: '+18566061070',
-    PAY_URL: 'https://swp.paymentsgateway.net/co/default.aspx?pg_api_login_id=73CD60681B',
+    PAY_URL: 'https://swp.paymentsgateway.net/co/default.aspx?pg_api_login_id=867CE923ED',
     APPLY_URL: 'https://acremortgage.floify.com/apply-now',   // corporate Floify application: nav Get pre-approved on every non-officer page
     LOGO: 'https://assets.cdn.filesafe.space/WRSWZkMuFbVf1m9jbNIE/media/677da085aa77f6a0c839fe7e.png',
     SITE: 'https://acremortgage.com'
