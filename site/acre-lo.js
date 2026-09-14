@@ -12,7 +12,7 @@
     // appended as ?lo=<slug>&lo_email=<email>; the form's hidden "Loan officer" field has query key "lo".
     FORM_EMBED_URL: 'https://api.leadconnectorhq.com/widget/form/8zQblX58jDyoLXY56rmr',
     RATES_URL: 'https://raw.githubusercontent.com/albanhox/acre-rates/main/rates.json',
-    HQ_PHONE: '(856) 606-1070', HQ_TEL: '+18566061070',
+    HQ_PHONE: '(800) 511-3330', HQ_TEL: '+18005113330',
     PAY_URL: 'https://portal.acremortgage.com/pay',
     LOGO: 'https://assets.cdn.filesafe.space/WRSWZkMuFbVf1m9jbNIE/media/677da085aa77f6a0c839fe7e.png',
     SITE: 'https://acremortgage.com'
@@ -134,6 +134,13 @@
 
   function init() {
     var root = document.getElementById('acre-lo'); if (!root || root.dataset.ready) return; root.dataset.ready = '1';
+    // 2026-09-14: the corporate number changed to (800) 511-3330. Blocks pasted before that still carry
+    // the old number in their own HTML; rewrite those links at load until every page is re-pasted (no-op after).
+    (function () {
+      function swap(n) { if (n.nodeType === 3) n.nodeValue = n.nodeValue.replace('(856) 606-1070', CFG.HQ_PHONE); else for (var c = n.firstChild; c; c = c.nextSibling) swap(c); }
+      var old = root.querySelectorAll('a[href="tel:+18566061070"]');
+      for (var i = 0; i < old.length; i++) { old[i].setAttribute('href', 'tel:' + CFG.HQ_TEL); swap(old[i]); }
+    })();
     // GHL wraps the pasted block in section > row > column, each carrying default
     // top/bottom padding (20/10/10). The homepage has these zeroed; match it so the
     // sticky nav sits flush at the top and the footer sits flush at the bottom.
