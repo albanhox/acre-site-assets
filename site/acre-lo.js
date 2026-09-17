@@ -97,18 +97,22 @@
       (lo.applyEs ? '<a class="btn btn-line" href="' + esc(lo.applyEs) + '" target="_blank" rel="noopener" lang="es">Solicitar en español ' + I.ext + '</a>' : '') +
       form + '<p class="alt">NMLS ' + esc(lo.nmls) + ' · <a href="https://www.nmlsconsumeraccess.org/EntityDetails.aspx/INDIVIDUAL/' + esc(lo.nmls) + '" target="_blank" rel="noopener">Verify on NMLS Consumer Access</a></p></div></div>';
   }
-  function afterHTML(lo) {
-    var f = esc(lo.first), S = CFG.SITE;
+  function relatedHTML(lo) {
+    var S = CFG.SITE;
     var related = ROSTER.filter(function (x) { return x.slug !== lo.slug && x.state === lo.state && !(x.city === lo.city && !x.cityOnly && !lo.cityOnly); }).slice(0, 3);
     if (related.length < 3) related = related.concat(ROSTER.filter(function (x) { return x.slug !== lo.slug && related.indexOf(x) < 0 && x.hq; }).slice(0, 3 - related.length));
+    return '<section class="related"><div class="wrap"><div class="head row"><div><span class="kicker">More of the team</span><h2>Other loan officers ' + esc(lo.cityOnly ? 'near you' : 'in ' + (STATE_NAMES[lo.state] || lo.state)) + '.</h2></div><a class="link" href="' + S + '/#experts">All ' + ROSTER.length + ' loan officers ' + I.arrow + '</a></div><div class="rel-grid">' +
+      related.map(function (r) { return '<a class="rel" href="' + S + '/' + r.slug + '">' + avatar(r, 'rel-av') + '<div><h3>' + esc(r.name) + '</h3><p>' + esc(r.title) + ' · ' + esc(r.city) + ', ' + esc(r.state) + '</p><span class="go">Profile ' + I.arrow + '</span></div></a>'; }).join('') + '</div></div></section>';
+  }
+  function afterHTML(lo) {
+    var f = esc(lo.first), S = CFG.SITE;
     return '<section class="p-est"><div class="wrap"><div class="panel"><div><span class="kicker">Estimate your payment</span><h2>Run the numbers before you call.</h2><p class="lede">Principal and interest at today\'s national average 30-year rate. Taxes and insurance are added at pre-approval, and ' + f + ' can price the exact scenario.</p></div>' +
       '<div class="card"><div class="big"><b id="est-pi">$0</b><span>/mo principal &amp; interest</span></div><div class="row"><div class="lbl"><span>Home price</span><output id="o-price">$375,000</output></div><input type="range" id="i-price" min="100000" max="1500000" step="5000" value="375000" aria-label="Home price"></div><div class="row"><div class="lbl"><span>Down payment</span><output id="o-down">10%</output></div><input type="range" id="i-down" min="0" max="70" step="0.5" value="10" aria-label="Down payment percent"></div><div class="row"><div class="lbl"><span>Rate</span><output id="o-rate">6.75%</output></div><input type="range" id="i-rate" min="4" max="9" step="0.125" value="6.75" aria-label="Interest rate"></div><p class="fine" id="est-note">30-year fixed. Rate starts at today\'s national average and is not a quote.</p><a class="btn btn-green btn-sm" href="#contact">Get a real quote from ' + f + '</a></div></div></div></section>' +
-      '<section class="related"><div class="wrap"><div class="head row"><div><span class="kicker">More of the team</span><h2>Other loan officers ' + esc(lo.cityOnly ? 'near you' : 'in ' + (STATE_NAMES[lo.state] || lo.state)) + '.</h2></div><a class="link" href="' + S + '/#experts">All 62 loan officers ' + I.arrow + '</a></div><div class="rel-grid">' +
-      related.map(function (r) { return '<a class="rel" href="' + S + '/' + r.slug + '">' + avatar(r, 'rel-av') + '<div><h3>' + esc(r.name) + '</h3><p>' + esc(r.title) + ' · ' + esc(r.city) + ', ' + esc(r.state) + '</p><span class="go">Profile ' + I.arrow + '</span></div></a>'; }).join('') + '</div></div></section>' +
+      relatedHTML(lo) +
       '<section class="lo-band"><div class="wrap"><div class="panel"><div><h2>Not sure who to call?</h2><p>Tell us where the property is and what you\'re trying to do. A loan officer licensed in your state, at the branch closest to you, picks it up.</p></div><div class="acts"><a class="btn btn-black" href="' + S + '/#contact">Match me with a loan officer</a><a class="btn btn-soft" href="' + S + '/#branches">See all branches</a></div></div></div></section>';
   }
 
-  function wire(root) {
+  function wireNav(root) {
     var $ = function (s) { return root.querySelector(s); };
     var nav = $('#nav'), tg = $('#nav-toggle');
     if (tg) {
@@ -119,6 +123,9 @@
       var sc = null; var onScroll = function () { var s = (window.scrollY || document.documentElement.scrollTop) > 12; if (s !== sc) { sc = s; nav.classList.toggle('scrolled', s); } };
       addEventListener('scroll', onScroll, { passive: true }); onScroll();
     }
+  }
+  function wireBody(root) {
+    var $ = function (s) { return root.querySelector(s); };
     var price = $('#i-price'), down = $('#i-down'), rate = $('#i-rate');
     if (price) {
       var est = function () { var p = +price.value, d = +down.value, r = +rate.value; var loan = p * (1 - d / 100), m = r / 100 / 12, n = 360; var pi = m ? loan * m / (1 - Math.pow(1 + m, -n)) : loan / n; $('#o-price').value = money(p); $('#o-down').value = d + '%'; $('#o-rate').value = r.toFixed(3).replace(/0+$/, '').replace(/\.$/, '') + '%'; $('#est-pi').textContent = money(pi); };
@@ -153,24 +160,106 @@
         w = w.parentElement;
       }
     })();
-    var slug = root.getAttribute('data-lo'); var lo = null;
-    for (var i = 0; i < ROSTER.length; i++) if (ROSTER[i].slug === slug) lo = ROSTER[i];
-    if (!lo) { console.warn('acre-lo: no roster entry for', slug); return; }
-    var fill = function (name, html) { var el = root.querySelector('[data-slot="' + name + '"]'); if (el) el.innerHTML = html; };
+    var slug = root.getAttribute('data-lo');
+    var find = function (list) { for (var i = 0; i < list.length; i++) if (list[i].slug === slug) return list[i]; return null; };
+    // Nav and footer need no officer data: draw them first so the page is never bare.
     root.insertAdjacentHTML('afterbegin', navHTML());
-    fill('programs', programsHTML(lo)); fill('steps', stepsHTML(lo)); fill('team', teamHTML(lo)); fill('contact', contactHTML(lo)); fill('after', afterHTML(lo));
     root.insertAdjacentHTML('beforeend', footerHTML());
-    wire(root);
+    wireNav(root);
+    // Officers in the baked roster render at once (no dependency on the portal being up). Officers added
+    // through the LO Portal after this file was built are not in it; they render once the live roster arrives.
+    var baked = find(ROSTER);
+    if (baked) { render(root, baked); applySeo(baked); }
+    loadRoster(function (live) {
+      if (!live) { if (baked) liveProfile(root, baked); else console.warn('acre-lo: no roster entry for', slug); return; }
+      ROSTER = live;
+      var lo = find(ROSTER);
+      if (!lo) { if (!baked) console.warn('acre-lo: no roster entry for', slug); return; }   // unpublished in the portal: leave the page as pasted
+      if (!baked) render(root, lo);
+      else {
+        // Already rendered from the baked copy: refresh the parts that depend on the roster or on fields the portal owns.
+        var el = root.querySelector('[data-slot="team"]'); if (el) el.innerHTML = teamHTML(lo);
+        var rel = root.querySelector('.related'); if (rel) rel.outerHTML = relatedHTML(lo);
+        var tel = root.querySelector('.contact a.row[href^="tel:"]'), mail = root.querySelector('.contact a.row[href^="mailto:"]');
+        if (tel && lo.phone !== baked.phone) { tel.setAttribute('href', 'tel:+1' + lo.phoneDigits); tel.querySelector('b').textContent = lo.phone; }
+        if (mail && lo.email !== baked.email) { mail.setAttribute('href', 'mailto:' + lo.email); mail.querySelector('b').textContent = lo.email; }
+      }
+      applyProfile(root, lo, lo);
+      applySeo(lo);
+    });
+  }
+  function render(root, lo) {
+    var fill = function (name, html) { var el = root.querySelector('[data-slot="' + name + '"]'); if (el) el.innerHTML = html; };
+    fill('programs', programsHTML(lo)); fill('steps', stepsHTML(lo)); fill('team', teamHTML(lo)); fill('contact', contactHTML(lo)); fill('after', afterHTML(lo));
+    wireBody(root);
     autoSizeForm(root);
     // Hero intro dedupe: pasted blocks built before 2026-09-09 repeat the first bio paragraph as the lede.
     // Runs here and again after the LO Portal overlay, which re-applies the stored (identical) intro.
     dedupeLede(root, lo);
-    liveProfile(root, lo);
   }
-  // LO Portal overlay. The pasted block ships the last-published bio for crawlers; this fetches the
-  // current approved record and patches the parts an officer can edit (intro line, bio, portrait,
-  // contact thumb). Any failure leaves the page exactly as pasted.
-  // Hero intro dedupe (module scope: init() and liveProfile() both call it).
+  // Live roster. The baked ROSTER above is the fallback; at load this fetches the LO Portal's published
+  // roster (/api/lo, 60 s cache) and merges it over the baked entries: portal fields win, baked-only fields
+  // (applyEs) survive, officers the portal no longer publishes drop out, officers added there appear. So a
+  // new officer is in teammates and related officers site-wide within a minute of approval, and only their
+  // own page needs the one paste. Failure or a slow portal (6 s) leaves the baked roster in place.
+  function loadRoster(cb) {
+    if (!CFG.PORTAL_API || !window.fetch) return cb(null);
+    var done = false, finish = function (r) { if (!done) { done = true; cb(r); } };
+    var ctl = window.AbortController ? new AbortController() : null;
+    var timer = setTimeout(function () { finish(null); if (ctl) ctl.abort(); }, 6000);
+    fetch(CFG.PORTAL_API + '/api/lo', ctl ? { cache: 'default', signal: ctl.signal } : { cache: 'default' })
+      .then(function (r) { return r.ok ? r.json() : Promise.reject(); })
+      .then(function (j) {
+        clearTimeout(timer);
+        var list = j && j.officers; if (!list || !list.length) return finish(null);
+        var by = {}; for (var i = 0; i < ROSTER.length; i++) by[ROSTER[i].slug] = ROSTER[i];
+        finish(list.map(function (o) { var m = {}, k, b = by[o.slug] || {}; for (k in b) m[k] = b[k]; for (k in o) if (o[k] != null) m[k] = o[k]; return m; }));
+      })
+      .catch(function () { clearTimeout(timer); finish(null); });
+  }
+  // SEO tags. The Cerberus page settings are typed by hand when a page is created, and a page cloned from
+  // another officer's keeps that officer's title and description until someone notices. This writes the title,
+  // meta description, Open Graph pair and canonical from the roster record (same wording the portal's Page HTML
+  // header shows), so a page cannot carry the wrong officer's tags. Google indexes the rendered DOM, so this
+  // counts; the page settings are still worth filling for crawlers that do not run scripts.
+  // The page runtime Cerberus ships re-applies the page-settings tags after hydration, so one write is not
+  // enough: the values are re-asserted on load, on a few timers and whenever <head> changes (writes only on drift).
+  function applySeo(lo) {
+    if (!lo.name || !lo.nmls) return;
+    applySeo.lo = lo;
+    if (!applySeo.armed) {
+      applySeo.armed = true;
+      var again = function () { if (applySeo.lo) applySeo(applySeo.lo); };
+      window.addEventListener('load', again);
+      [800, 2500, 6000].forEach(function (ms) { setTimeout(again, ms); });
+      if (window.MutationObserver) new MutationObserver(function () { if (!applySeo.busy) again(); }).observe(document.head, { childList: true, subtree: true, attributes: true, characterData: true });
+    }
+    applySeo.busy = true;
+    try { writeSeo(lo); } finally { applySeo.busy = false; }
+  }
+  function writeSeo(lo) {
+    var where = lo.cityOnly ? ' serving ' + lo.city + ', ' + lo.state : ' in ' + lo.city + ', ' + lo.state;
+    var title = lo.name + ' | ' + lo.title + ', Acre Mortgage | NMLS ' + lo.nmls;
+    var desc = lo.first + ' is a ' + String(lo.title).toLowerCase() + ' at Acre Mortgage' + where + '. Call ' + lo.phone + ', email or apply online. NMLS ' + lo.nmls + '.';
+    var head = document.head, url = CFG.SITE + '/' + lo.slug;
+    var set = function (sel, attr, val, tag, attrs) {
+      var el = head.querySelector(sel);
+      if (!el) { el = document.createElement(tag); for (var k in attrs) el.setAttribute(k, attrs[k]); head.appendChild(el); }
+      if (el.getAttribute(attr) !== val) el.setAttribute(attr, val);
+    };
+    if (document.title !== title) document.title = title;
+    set('meta[name="description"]', 'content', desc, 'meta', { name: 'description' });
+    set('meta[property="og:title"]', 'content', title, 'meta', { property: 'og:title' });
+    set('meta[property="og:description"]', 'content', desc, 'meta', { property: 'og:description' });
+    set('meta[property="og:url"]', 'content', url, 'meta', { property: 'og:url' });
+    if (lo.portrait) set('meta[property="og:image"]', 'content', lo.portrait, 'meta', { property: 'og:image' });
+    set('link[rel="canonical"]', 'href', url, 'link', { rel: 'canonical' });
+    document.documentElement.setAttribute('data-lo-seo', lo.slug);
+  }
+  // LO Portal overlay. The pasted block ships the last-published bio for crawlers; applyProfile patches the
+  // parts an officer can edit (intro line, bio, portrait, contact thumb) from the current approved record.
+  // liveProfile fetches that record on its own when the roster fetch failed. Any failure leaves the page as pasted.
+  // Hero intro dedupe (module scope: render() and applyProfile() both call it).
   function dedupeLede(root, lo) {
     var ledeEl = root.querySelector('.p-hero .lede'), firstP = root.querySelector('.bio p');
     if (!ledeEl || !firstP || ledeEl.textContent.trim() !== firstP.textContent.trim()) return;
@@ -178,23 +267,24 @@
     if (lo.bioPlaceholder) { ledeEl.textContent = lo.title + ' at Acre Mortgage, ' + where + '. Same-day replies, in-house underwriting, licensed in 15 states and DC.'; return; }
     var t = firstP.textContent.trim(), mt = t.match(/^.+?[.!?](?=\s|$)/); ledeEl.textContent = mt ? mt[0] : t.slice(0, 180);
   }
+  function applyProfile(root, lo, p) {
+    if (!p || p.slug !== lo.slug) return;
+    var esc = function (t) { return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
+    var el;
+    if (p.lede && (el = root.querySelector('.p-hero .lede'))) el.textContent = p.lede;
+    if (p.bio && p.bio.length && (el = root.querySelector('.bio'))) {
+      el.innerHTML = p.bio.map(function (t) { return '<p>' + esc(t) + '</p>'; }).join('');
+    }
+    if (p.portrait && (el = root.querySelector('.p-portrait img')) && el.getAttribute('src') !== p.portrait) el.setAttribute('src', p.portrait);
+    if (p.thumb) root.querySelectorAll('img[data-lo-thumb="' + lo.slug + '"]').forEach(function (im) { im.setAttribute('src', p.thumb); });
+    root.setAttribute('data-live-profile', p.updatedAt || '1');
+    dedupeLede(root, lo);
+  }
   function liveProfile(root, lo) {
     if (!CFG.PORTAL_API || !window.fetch) return;
-    var esc = function (t) { return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
     fetch(CFG.PORTAL_API + '/api/lo/' + encodeURIComponent(lo.slug), { cache: 'default' })
       .then(function (r) { return r.ok ? r.json() : Promise.reject(); })
-      .then(function (p) {
-        if (!p || p.slug !== lo.slug) return;
-        var el;
-        if (p.lede && (el = root.querySelector('.p-hero .lede'))) el.textContent = p.lede;
-        if (p.bio && p.bio.length && (el = root.querySelector('.bio'))) {
-          el.innerHTML = p.bio.map(function (t) { return '<p>' + esc(t) + '</p>'; }).join('');
-        }
-        if (p.portrait && (el = root.querySelector('.p-portrait img')) && el.getAttribute('src') !== p.portrait) el.setAttribute('src', p.portrait);
-        if (p.thumb) root.querySelectorAll('img[data-lo-thumb="' + lo.slug + '"]').forEach(function (im) { im.setAttribute('src', p.thumb); });
-        root.setAttribute('data-live-profile', p.updatedAt || '1');
-        dedupeLede(root, lo);
-      })
+      .then(function (p) { applyProfile(root, lo, p); })
       .catch(function () { /* stay with the pasted content */ });
   }
   // Auto-size the Cerberus form: it runs iframe-resizer inside; send its init handshake and apply the heights it reports, so the form never scrolls inside the card.
