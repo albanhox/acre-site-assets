@@ -254,6 +254,16 @@
     set('meta[property="og:url"]', 'content', url, 'meta', { property: 'og:url' });
     if (lo.portrait) set('meta[property="og:image"]', 'content', lo.portrait, 'meta', { property: 'og:image' });
     set('link[rel="canonical"]', 'href', url, 'link', { rel: 'canonical' });
+    // Structured data: a schema.org Person for the officer, employed by Acre Mortgage, at the office address.
+    var ld = { '@context': 'https://schema.org', '@type': 'Person', name: lo.name, jobTitle: lo.title, url: url, telephone: '+1' + (lo.phoneDigits || String(lo.phone || '').replace(/\D/g, '')), email: lo.email,
+      identifier: { '@type': 'PropertyValue', propertyID: 'NMLS', value: String(lo.nmls) },
+      worksFor: { '@type': 'Organization', name: 'Acre Mortgage', url: CFG.SITE, identifier: { '@type': 'PropertyValue', propertyID: 'NMLS', value: '13988' } } };
+    if (lo.portrait || lo.thumb) ld.image = lo.portrait || lo.thumb;
+    if (!lo.cityOnly && lo.street) ld.workLocation = { '@type': 'Place', address: { '@type': 'PostalAddress', streetAddress: lo.street, addressLocality: lo.city, addressRegion: lo.state, postalCode: lo.zip || undefined, addressCountry: 'US' } };
+    else if (lo.city) ld.workLocation = { '@type': 'Place', address: { '@type': 'PostalAddress', addressLocality: lo.city, addressRegion: lo.state, addressCountry: 'US' } };
+    var ldText = JSON.stringify(ld), ldEl = head.querySelector('script#acre-lo-ld');
+    if (!ldEl) { ldEl = document.createElement('script'); ldEl.type = 'application/ld+json'; ldEl.id = 'acre-lo-ld'; head.appendChild(ldEl); }
+    if (ldEl.textContent !== ldText) ldEl.textContent = ldText;
     document.documentElement.setAttribute('data-lo-seo', lo.slug);
   }
   // LO Portal overlay. The pasted block ships the last-published bio for crawlers; applyProfile patches the
